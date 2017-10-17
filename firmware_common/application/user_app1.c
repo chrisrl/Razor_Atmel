@@ -87,6 +87,15 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+  /* All discrete LEDs to off */
+  LedOff(WHITE);
+  LedOff(PURPLE);
+  LedOff(BLUE);
+  LedOff(CYAN);
+  LedOff(GREEN);
+  LedOff(YELLOW);
+  LedOff(ORANGE);
+  LedOff(RED);
  
   /* If good initialization, set state to Idle */
   if( 1 )
@@ -136,7 +145,22 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
+  static u16 u16BlinkCount = 0;
 
+  u16BlinkCount++;
+  if(u16BlinkCount == 500)
+  {
+    LedToggle(BLUE);
+  }
+  if(u16BlinkCount == 1000)
+  {
+    LedToggle(RED);
+  }
+  if(u16BlinkCount == 1500)
+  {
+    u16BlinkCount = 0;
+    LedToggle(GREEN);
+  }
 } /* end UserApp1SM_Idle() */
     
 
