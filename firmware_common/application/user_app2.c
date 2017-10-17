@@ -45,7 +45,7 @@ Variable names shall start with "UserApp2_" and be declared as static.
 ***********************************************************************************************************************/
 static fnCode_type UserApp2_StateMachine;            /* The state machine function pointer */
 //static u32 UserApp2_u32Timeout;                      /* Timeout counter used across states */
-
+LedRateType eCurrentRate = LED_PWM_0;
 
 /**********************************************************************************************************************
 Function Definitions
@@ -74,6 +74,7 @@ Promises:
 */
 void UserApp2Initialize(void)
 {
+  
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -122,6 +123,25 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp2SM_Idle(void)
 {
+  static u16 u16BlinkCount = 0;
+  static u8 n = 0;
+
+  u16BlinkCount++;
+  if(eCurrentRate == 100)
+    n = 1;
+  if(eCurrentRate == 0)
+    n = 0;
+  if(u16BlinkCount == 40 && n = 0)
+  {
+    u16BlinkCount = 0;
+    eCurrentRate++;
+  }
+  if(u16BlinkCount == 40 && n = 1)
+  {
+    u16BlinkCount = 0;
+    eCurrentRate --;
+  }
+
     
 } /* end UserApp2SM_Idle() */
      
