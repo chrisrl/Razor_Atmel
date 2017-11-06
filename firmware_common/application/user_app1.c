@@ -148,6 +148,18 @@ static void UserApp1SM_Idle(void)
   static u32 u32WasCounter = 0;
   static bool bYellowBlink = FALSE;
   static LedRateType setrate = LED_1HZ;
+  
+  LedON(BLUE);
+  if (WasButtonPressed(BUTTON0) && u32Counter == 0) {
+    ButtonAcknowledge(BUTTON0);
+    u32WasCounter++;
+  }
+  if (WasButtonPressed (BUTTON1) && u32WasCounter == 1) {
+    ButtonAcknowledge(BUTTON1);
+  }
+  else {
+    u32WasCounter == 0;
+  }
 
 } /* end UserApp1SM_Idle() */
     
