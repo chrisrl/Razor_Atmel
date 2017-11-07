@@ -148,71 +148,67 @@ static void UserApp1SM_Idle(void)
   static int pass [] = {1,2,3,2,0,0,0,0,0,0};
   static int store [] = {0,0,0,0,0,0,0,0,0,0};
   static int lock = 1;
+  static bool bRed = TRUE;
+  static bool bGreen = TRUE;
   
+  /* locked states */
   if (lock == 1) {
     LedOff(GREEN);
-    LedOff(YELLOW);
     LedOn(RED);
   }
   if (lock == 2) {
     LedOff(GREEN);
-    LedOff(RED);
-    LedOn(YELLOW);
+    if (bRed) {
+      bRed = FALSE;
+      LedBlink(RED, LED_4HZ);
+    }
   }
   if (lock == 3) {
     LedOff(RED);
-    LedOff(YELLOW);
-    LedOn(GREEN);
-  }
-#if 0
-  switch (lock) {
-    case 1 :
-      LedOn(RED);
-    case 2 :
-      LedBlink(RED, LED_8HZ);
-    case 3:
-      LedOn(GREEN);
-    //default :
-      //LedOn(YELLOW);
+    if (bGreen) {
+      bGreen = FALSE;
+      LedBlink(GREEN, LED_4HZ);
+    }
   }
 
-  if (lock && !wrong)
-    LedON(RED);
-  elseif (wrong && u32WasCounter < 1000)
-    u32WasCounter++;
-    LedBlink(RED, LED_2HZ);
-  else
-    LedOFF
-  
-  if (WasButtonPressed(BUTTON0)) {
-    ButtonAcknowledge(BUTTON0);
-    store[place] = 1;
-    place++;
+  /*Light when inputing buttons*/
+  if (IsButtonPressed(BUTTON0)) {
+    LedOn(WHITE);
   }
-#endif
+  else {
+    LedOff(WHITE);
+  }
+  if (IsButtonPressed(BUTTON1)) {
+    LedOn(PURPLE);
+  }
+  else {
+    LedOff(PURPLE);
+  }
+  if (IsButtonPressed(BUTTON2)) {
+    LedOn(BLUE);
+  }
+  else {
+    LedOff(BLUE);
+  }
 
-
+  /*Storage of input password*/
   if (WasButtonPressed (BUTTON0) && lock == 1) {
     ButtonAcknowledge(BUTTON0);
-    LedToggle(WHITE);
     store[place] = 1;
     place++;
   } 
   else if (WasButtonPressed (BUTTON1) && lock == 1) {
     ButtonAcknowledge(BUTTON1);
-    LedToggle(PURPLE);
     store[place] = 2;
     place++;
   }
   else if (WasButtonPressed (BUTTON2) && lock == 1) {
     ButtonAcknowledge(BUTTON2);
-    LedToggle(BLUE);
     store[place] = 3;
     place++;
   }
-  else if (WasButtonPressed (BUTTON3) && lock == 1) {
+  else if (WasButtonPressed (BUTTON3) && lock == 1 && place != -1) {
     ButtonAcknowledge(BUTTON3);
-    LedToggle(CYAN);
     if (place > 10) {
       lock = 2;
     }
@@ -232,16 +228,13 @@ static void UserApp1SM_Idle(void)
       store[j] = 0;
     }
   }
-  else if (WasButtonPressed(BUTTON0) && lock > 1) {
-    place = 0;
+  else if ( (WasButtonPressed(BUTTON0) || WasButtonPressed(BUTTON1) || WasButtonPressed(BUTTON2) || WasButtonPressed(BUTTON3)) && lock > 1) {
+    place = -1;
+    bRed = TRUE;
+    bGreen = TRUE;
     lock = 1;
   }
-#if 0
-  if ((WasButtonPressed (BUTTON0) || WasButtonPressed (BUTTON1) || WasButtonPressed (BUTTON2) || WasButtonPressed (BUTTON3)) && lock != 1) {
-    place = 0;
-    lock = 1;
-  }
-#endif
+
   
         
       
