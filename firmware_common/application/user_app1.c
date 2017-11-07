@@ -144,22 +144,107 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-  static u32 u32IsCounter = 0;
-  static u32 u32WasCounter = 0;
-  static bool bYellowBlink = FALSE;
-  static LedRateType setrate = LED_1HZ;
+  static int place = 0;
+  static int pass [] = {1,2,3,2,0,0,0,0,0,0};
+  static int store [] = {0,0,0,0,0,0,0,0,0,0};
+  static int lock = 1;
   
-  LedON(BLUE);
-  if (WasButtonPressed(BUTTON0) && u32Counter == 0) {
-    ButtonAcknowledge(BUTTON0);
+  if (lock == 1) {
+    LedOff(GREEN);
+    LedOff(YELLOW);
+    LedOn(RED);
+  }
+  if (lock == 2) {
+    LedOff(GREEN);
+    LedOff(RED);
+    LedOn(YELLOW);
+  }
+  if (lock == 3) {
+    LedOff(RED);
+    LedOff(YELLOW);
+    LedOn(GREEN);
+  }
+#if 0
+  switch (lock) {
+    case 1 :
+      LedOn(RED);
+    case 2 :
+      LedBlink(RED, LED_8HZ);
+    case 3:
+      LedOn(GREEN);
+    //default :
+      //LedOn(YELLOW);
+  }
+
+  if (lock && !wrong)
+    LedON(RED);
+  elseif (wrong && u32WasCounter < 1000)
     u32WasCounter++;
+    LedBlink(RED, LED_2HZ);
+  else
+    LedOFF
+  
+  if (WasButtonPressed(BUTTON0)) {
+    ButtonAcknowledge(BUTTON0);
+    store[place] = 1;
+    place++;
   }
-  if (WasButtonPressed (BUTTON1) && u32WasCounter == 1) {
+#endif
+
+
+  if (WasButtonPressed (BUTTON0) && lock == 1) {
+    ButtonAcknowledge(BUTTON0);
+    LedToggle(WHITE);
+    store[place] = 1;
+    place++;
+  } 
+  else if (WasButtonPressed (BUTTON1) && lock == 1) {
     ButtonAcknowledge(BUTTON1);
+    LedToggle(PURPLE);
+    store[place] = 2;
+    place++;
   }
-  else {
-    u32WasCounter == 0;
+  else if (WasButtonPressed (BUTTON2) && lock == 1) {
+    ButtonAcknowledge(BUTTON2);
+    LedToggle(BLUE);
+    store[place] = 3;
+    place++;
   }
+  else if (WasButtonPressed (BUTTON3) && lock == 1) {
+    ButtonAcknowledge(BUTTON3);
+    LedToggle(CYAN);
+    if (place > 10) {
+      lock = 2;
+    }
+    else {
+      store[place] = 0;
+      for (int i = 0; i < 10; i++) {
+        if (pass[i] != store[i]) {
+          lock = 2;
+          place = 0;
+          break;
+        } 
+      }
+    }
+    if (lock == 1)
+      lock = 3;
+    for (int j = 0; j < 10; j++) {
+      store[j] = 0;
+    }
+  }
+  else if (WasButtonPressed(BUTTON0) && lock > 1) {
+    place = 0;
+    lock = 1;
+  }
+#if 0
+  if ((WasButtonPressed (BUTTON0) || WasButtonPressed (BUTTON1) || WasButtonPressed (BUTTON2) || WasButtonPressed (BUTTON3)) && lock != 1) {
+    place = 0;
+    lock = 1;
+  }
+#endif
+  
+        
+      
 
 } /* end UserApp1SM_Idle() */
     
