@@ -42,7 +42,10 @@ All Global variable names shall start with "G_UserApp1"
 ***********************************************************************************************************************/
 /* New variables */
 volatile u32 G_u32UserApp1Flags;                       /* Global state flags */
-
+/*--------------------------------------------------*/
+/* Existing variables (defined in other files)      */
+extern u8 G_au8DebugScanfBuffer[];  /* From debug.c */
+extern u8 G_u8DebugScanfCharCount;  /* From debug.c */
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Existing variables (defined in other files -- should all contain the "extern" keyword) */
@@ -59,7 +62,8 @@ Variable names shall start with "UserApp1_" and be declared as static.
 ***********************************************************************************************************************/
 static fnCode_type UserApp1_StateMachine;            /* The state machine function pointer */
 //static u32 UserApp1_u32Timeout;                      /* Timeout counter used across states */
-
+/* Char buffer: */
+static u8 UserApp_au8UserInputBuffer[U16_USER_INPUT_BUFFER_SIZE  ];
 
 /**********************************************************************************************************************
 Function Definitions
@@ -87,6 +91,25 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+  for(u16 i = 0; i < U16_USER_INPUT_BUFFER_SIZE  ; i++)
+  {
+    UserApp_au8UserInputBuffer[i] = 0;
+  }
+  
+  u8 au8String[] = "A string to print that returns cursor to start of next line.\n\r";
+  u8 au8String2[] = "Here's a number: ";
+  u8 au8String3[] = " < The 'cursor' was here after the number.";
+  u32 u32Number = 1234567;
+
+  DebugPrintf(au8String);
+  DebugPrintf(au8String2);
+  DebugPrintNumber(u32Number);
+  DebugPrintf(au8String3);
+  DebugLineFeed();
+  DebugPrintf(au8String3);
+  DebugLineFeed();
+  
+  
  
   /* If good initialization, set state to Idle */
   if( 1 )
@@ -134,8 +157,55 @@ State Machine Function Definitions
 
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for ??? */
+
 static void UserApp1SM_Idle(void)
 {
+  static u8 au8NumCharsMessage[] = "\n\rCharacters in buffer: ";
+  static u8 au8BufferMessage[]   = "\n\rBuffer contents:\n\r";
+  static u8 au8EmptyMessage[] = "\n\rEMPTY!\n\r";
+  u8 u8CharCount;
+  
+  
+  if(WasButtonPressed(BUTTON1))
+  {
+    ButtonAcknowledge(BUTTON1);
+   
+  
+    
+    /* Read the buffer and print the contents */
+    u8CharCount = DebugScanf(UserApp_au8UserInputBuffer);
+    
+    UserApp_au8UserInputBuffer[u8CharCount] = '\0';
+    /* Make sure there's at least one character in there! */
+    if(u8CharCount > 0)
+    {
+      DebugPrintf(au8BufferMessage);
+      DebugPrintf(UserApp_au8UserInputBuffer);
+      DebugLineFeed();
+    }
+    else
+    {
+      DebugPrintf(au8EmptyMessage);
+    }
+    //DebugPrintf(UserApp_au8UserInputBuffer);
+    
+    
+     
+    
+  }
+  
+  static u8 u8NumCharsMessage[] = "\n\rCharacters in buffer: ";
+
+  /* Print message with number of characters in scanf buffer */
+  if(WasButtonPressed(BUTTON0))
+  {
+    ButtonAcknowledge(BUTTON0);
+    
+    DebugPrintf(u8NumCharsMessage);
+    DebugPrintNumber(G_u8DebugScanfCharCount);
+    DebugLineFeed();
+  }
+  
 
 } /* end UserApp1SM_Idle() */
     
