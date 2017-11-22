@@ -148,37 +148,34 @@ static void UserApp1SM_Idle(void)
   static char name[] = "chris";
   static u8 u8NumCharsMessage[] = "heck ya: ";
   static int count = 0;
-  //static int BuffCount = 0;
-  u8 u8CharCount;
-  int store = 0; //?
-  int check = 0;
-  int num = 0;
+  static u8 u8CharCount;
+  static char compare[5];
+  static int j = 0;
+  static int check = 0;
   
-  if ( G_u8DebugScanfCharCount >= 5) {
-    store = G_u8DebugScanfCharCount; //?
-    u8CharCount = DebugScanf(UserApp_au8UserInputBuffer);
-    G_u8DebugScanfCharCount = store; //?
-    UserApp_au8UserInputBuffer[u8CharCount] = '\0';
-    for (int i = 0; name[i] != '\0'; i++) {
-      if (name [i] != UserApp_au8UserInputBuffer[i]) {
-        check = 0;
-        break;
-      }
-      else
-        check++;
+  u8CharCount = DebugScanf(UserApp_au8UserInputBuffer);
+  compare[j] = UserApp_au8UserInputBuffer[0];
+  for (int i = 0; compare[i] != '\0'; i++) {
+    if (UserApp_au8UserInputBuffer[0] == '\0')
+      break;
+    if (name [i] != compare[i]) {
+      check = 0;
+      j = 0;
+      break;
     }
-    if (check > 0) {
-      count++;
-      DebugLineFeed();
-      DebugPrintf(u8NumCharsMessage);
-      DebugPrintNumber(count);
-      DebugLineFeed();
-    }
-    else {
-      num +=5;
-      //G_u8DebugScanfCharCount = 0;
-    }
+    else
+      j++;
+      check++;
   }
+  if (check == 5) {
+    count++;
+    DebugLineFeed();
+    DebugPrintf(u8NumCharsMessage);
+    DebugPrintNumber(count);
+    DebugLineFeed();
+    check = 0;
+  }
+  UserApp_au8UserInputBuffer[0] = '\0';
   
 
 } /* end UserApp1SM_Idle() */
