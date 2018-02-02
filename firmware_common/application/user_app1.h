@@ -58,7 +58,15 @@ static void UserApp1SM_Idle(void);
 
 static void UserApp1SM_Error(void);         
 
+static void UserApp1SM_BlinkBlue(void);
 
+static void UserApp1SM_BlinkGreen(void);
+
+static void UserApp1SM_GreenSolid (void);
+
+static void UserApp1SM_RedBlink (void);
+
+static void UserApp1SM_RedON (void);
 #endif /* __USER_APP1_H */
 
 

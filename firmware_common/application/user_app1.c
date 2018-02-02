@@ -58,7 +58,7 @@ Global variable definitions with scope limited to this local application.
 Variable names shall start with "UserApp1_" and be declared as static.
 ***********************************************************************************************************************/
 static fnCode_type UserApp1_StateMachine;            /* The state machine function pointer */
-//static u32 UserApp1_u32Timeout;                      /* Timeout counter used across states */
+static u32 UserApp1_u32Timeout = 10000;                      /* Timeout counter used across states */
 
 
 /**********************************************************************************************************************
@@ -91,7 +91,8 @@ void UserApp1Initialize(void)
   /* If good initialization, set state to Idle */
   if( 1 )
   {
-    UserApp1_StateMachine = UserApp1SM_Idle;
+    LedOn(RED);
+    UserApp1_StateMachine = UserApp1SM_RedON;
   }
   else
   {
@@ -136,15 +137,91 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-
+  /* Check if button was pressed */
+  if(WasButtonPressed(BUTTON0)) {
+    ButtonAcknowledge(BUTTON0);
+    
+    LedOff(YELLOW);
+    LedBlink(GREEN, LED_2HZ);
+    
+    UserApp1_u32Timeout = G_u32SystemTime1ms;
+    UserApp1_StateMachine = UserApp1SM_BlinkGreen;
+  }
 } /* end UserApp1SM_Idle() */
     
+static void UserApp1SM_BlinkGreen(void)
+{
+  if (WasButtonPressed(BUTTON0)) {
+    ButtonAcknowledge(BUTTON0);
+    
+    LedOff(GREEN);
+    LedBlink(BLUE, LED_2HZ);
+    
+    UserApp1_u32Timeout = G_u32SystemTime1ms;
+    UserApp1_StateMachine = UserApp1SM_BlinkBlue;
+  }
+  
+  if (IsTimeUp(&UserApp1_u32Timeout, 10000)) {
+    LedOff(GREEN);
+    LedOn(YELLOW);
+    UserApp1_StateMachine = UserApp1SM_Idle;
+  }
+}
 
+static void UserApp1SM_BlinkBlue(void)
+{
+  if (WasButtonPressed(BUTTON0)) {
+    ButtonAcknowledge(BUTTON0);
+    
+    LedOff(BLUE);
+    LedOn(GREEN);
+    
+    UserApp1_u32Timeout = G_u32SystemTime1ms;
+    UserApp1_StateMachine = UserApp1SM_GreenSolid;
+  }
+}
+
+static void UserApp1SM_GreenSolid (void)
+{
+  if (WasButtonPressed(BUTTON0)) {
+    ButtonAcknowledge(BUTTON0);
+    
+    LedOff(GREEN);
+    LedOn(YELLOW);
+    
+    UserApp1_u32Timeout = G_u32SystemTime1ms;
+    UserApp1_StateMachine = UserApp1SM_Idle;
+  }
+  
+  if (IsTimeUp(&UserApp1_u32Timeout, 10000)) {
+    LedOff(GREEN);
+    LedBlink(RED, LED_2HZ);
+    UserApp1_StateMachine = UserApp1SM_RedBlink;
+  }
+}
+
+static void UserApp1SM_RedBlink (void)
+{
+  
+}
+
+static void UserApp1SM_RedON (void)
+{
+  if (WasButtonPressed(BUTTON0)) {
+    ButtonAcknowledge(BUTTON0);
+    
+    LedOff(RED);
+    LedOn(YELLOW);
+    
+    UserApp1_u32Timeout = G_u32SystemTime1ms;
+    UserApp1_StateMachine = UserApp1SM_Idle;
+  }
+}
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Handle an error */
 static void UserApp1SM_Error(void)          
 {
-  
+  LedBlink(RED,LED_2HZ);
 } /* end UserApp1SM_Error() */
 
 
