@@ -29,7 +29,18 @@ Type Definitions
 Constants / Definitions
 **********************************************************************************************************************/
 
-
+/* Required constants for ANT channel configuration */
+#define ANT_CHANNEL_USERAPP             ANT_CHANNEL_0         
+#define ANT_CHANNEL_TYPE_USERAPP        CHANNEL_TYPE_SLAVE    
+#define ANT_DEVICEID_LO_USERAPP         0xCE          
+#define ANT_DEVICEID_HI_USERAPP         0x07      
+#define ANT_DEVICE_TYPE_USERAPP         (u8)1        
+#define ANT_TRANSMISSION_TYPE_USERAPP   (u8)1             
+#define ANT_CHANNEL_PERIOD_LO_USERAPP   (u8)0x00       
+#define ANT_CHANNEL_PERIOD_HI_USERAPP   (u8)0x20      
+#define ANT_FREQUENCY_USERAPP           (u8)50           
+#define ANT_TX_POWER_USERAPP            RADIO_TX_POWER_4DBM 
+#define TIMEOUT_VALUE                   10000
 /**********************************************************************************************************************
 Function Declarations
 **********************************************************************************************************************/
@@ -56,17 +67,14 @@ State Machine Declarations
 ***********************************************************************************************************************/
 static void UserApp1SM_Idle(void);    
 
-static void UserApp1SM_Error(void);         
+static void UserApp1SM_Error(void); 
 
-static void UserApp1SM_BlinkBlue(void);
+static void UserApp1SM_WaitChannelOpen(void);
 
-static void UserApp1SM_BlinkGreen(void);
+static void UserApp1SM_ChannelOpen(void);
 
-static void UserApp1SM_GreenSolid (void);
+static void UserApp1SM_WaitChannelClose (void);
 
-static void UserApp1SM_RedBlink (void);
-
-static void UserApp1SM_RedON (void);
 #endif /* __USER_APP1_H */
 
 
