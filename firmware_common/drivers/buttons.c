@@ -77,7 +77,7 @@ The order of the definitions below must match the order of the definitions provi
 #ifdef EIE1
 static const u32 Button_au32ButtonPins[TOTAL_BUTTONS] = 
 {
-  PA_17_BUTTON0, PB_00_BUTTON1, PB_01_BUTTON2, PB_02_BUTTON3
+  PA_17_BUTTON0, PB_00_BUTTON1, PB_01_BUTTON2, PB_02_BUTTON3, PB_04_BLADE_AN1
 };
 
 /* Control array for all buttons in system initialized for ButtonInitialize().  Array values correspond to ButtonConfigType fields: 
@@ -87,6 +87,7 @@ static ButtonConfigType Buttons_asArray[TOTAL_BUTTONS] =
  {BUTTON_ACTIVE_LOW, BUTTON_PORTB}, /* BUTTON1  */
  {BUTTON_ACTIVE_LOW, BUTTON_PORTB}, /* BUTTON2  */
  {BUTTON_ACTIVE_LOW, BUTTON_PORTB}, /* BUTTON3  */
+ {BUTTON_ACTIVE_HIGH, BUTTON_PORTB}, /* BLADE_AN1*/
 };   
 #endif /* EIE1 */
 

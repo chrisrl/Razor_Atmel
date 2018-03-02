@@ -60,7 +60,6 @@ Variable names shall start with "UserApp1_" and be declared as static.
 static fnCode_type UserApp1_StateMachine;            /* The state machine function pointer */
 //static u32 UserApp1_u32Timeout;                      /* Timeout counter used across states */
 
-
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -87,6 +86,14 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+  LedOff(WHITE);
+  LedOff(PURPLE);
+  LedOff(BLUE);
+  LedOff(CYAN);
+  LedOff(GREEN);
+  LedOff(YELLOW);
+  LedOff(ORANGE);
+  LedOff(RED);
  
   /* If good initialization, set state to Idle */
   if( 1 )
@@ -136,7 +143,16 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-
+    if( IsButtonPressed(BLADE_AN1) || IsButtonPressed(BUTTON0) )
+  {
+    /* The button is currently pressed, so make sure the LED is on */
+    LedOn(WHITE);
+  }
+    else
+  {
+    /* The button is not pressed, so make sure the LED is off */
+    LedOff(WHITE);
+  }
 } /* end UserApp1SM_Idle() */
     
 
