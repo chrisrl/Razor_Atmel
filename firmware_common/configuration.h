@@ -245,17 +245,18 @@ The order of the definitions below must match the order of the definitions provi
 */
 
 #ifdef EIE1
-#define TOTAL_BUTTONS         (u8)5       /* Total number of Buttons in the system */
+#define TOTAL_BUTTONS         (u8)6       /* Total number of Buttons in the system */
 
 #define BUTTON0               (u32)0
 #define BUTTON1               (u32)1
 #define BUTTON2               (u32)2
 #define BUTTON3               (u32)3
 #define BLADE_AN1             (u32)4
+#define BLADE_AN0             (u32)5
 
 /* All buttons on each port must be ORed together here: set to 0 if no buttons on the port */
 #define GPIOA_BUTTONS         (u32)( PA_17_BUTTON0 )
-#define GPIOB_BUTTONS         (u32)( PB_00_BUTTON1 | PB_01_BUTTON2 | PB_02_BUTTON3 | PB_04_BLADE_AN1 )
+#define GPIOB_BUTTONS         (u32)( PB_00_BUTTON1 | PB_01_BUTTON2 | PB_02_BUTTON3 | PB_04_BLADE_AN1 | PB_03_BLADE_AN0 )
 #endif /* EIE1 */
 
 #ifdef MPGL2

@@ -143,7 +143,7 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-    if( IsButtonPressed(BLADE_AN1) || IsButtonPressed(BUTTON0) )
+    if( IsButtonPressed(BLADE_AN1) || IsButtonPressed(BUTTON0) || IsButtonPressed(BLADE_AN0) )
   {
     /* The button is currently pressed, so make sure the LED is on */
     LedOn(WHITE);
