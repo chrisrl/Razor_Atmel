@@ -94,6 +94,11 @@ void UserApp1Initialize(void)
   LedOff(YELLOW);
   LedOff(ORANGE);
   LedOff(RED);
+  LedOff(LCD_BLUE);
+  LedOff(LCD_RED);
+ 
+
+  
  
   /* If good initialization, set state to Idle */
   if( 1 )
@@ -143,15 +148,51 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-    if( IsButtonPressed(BLADE_AN1) || IsButtonPressed(BUTTON0) || IsButtonPressed(BLADE_AN0) )
+  static int  freq = 912;
+  static int increment = -1;
+  static int timer = 0;
+  
+  u8 allclear[] = "ALL CLEAR";
+  u8 objectdetected[] = "OBJECT DETECTED";
+  
+  
+  PWMAudioSetFrequency(BUZZER1, freq);
+  
+  PWMAudioSetFrequency(BUZZER2, freq);
+
+    if( IsButtonPressed(BLADE_AN1) || IsButtonPressed(BUTTON0) )
   {
-    /* The button is currently pressed, so make sure the LED is on */
-    LedOn(WHITE);
+    /* The PIR is detecting something */
+    LedOn(RED);
+    LedOff(LCD_GREEN);
+    LedOn(LCD_RED);
+    
+    PWMAudioOn(BUZZER2);
+    PWMAudioOn(BUZZER1);
+    
+    if (freq >= 912)
+      increment = -1;
+    if (freq <= 635)
+      increment = 1;
+      
+    LCDCommand(LCD_CLEAR_CMD);
+    LCDMessage(LINE1_START_ADDR, objectdetected);
+    
+    freq = freq + increment;
+     
   }
     else
   {
-    /* The button is not pressed, so make sure the LED is off */
-    LedOff(WHITE);
+    /* The PIR is not detecting anything */
+    LedOn(LCD_GREEN);
+    LedOff(RED);
+    
+    PWMAudioOff(BUZZER1);
+    PWMAudioOff(BUZZER2);
+    
+    LCDCommand(LCD_CLEAR_CMD);
+    LCDMessage(LINE1_START_ADDR, allclear);
+
   }
 } /* end UserApp1SM_Idle() */
     

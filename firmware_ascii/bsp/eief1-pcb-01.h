@@ -509,7 +509,7 @@ counter must be set at 1280. */
     00 [1] PA_00_TP54 PIO control enabled
 */
 
-#define PIOB_PER_INIT (u32)0x01BFFF57
+#define PIOB_PER_INIT (u32)0x01BFFFF7
 /*
     31 [0] PB_31_ PIO control not enabled
     30 [0] PB_30_ PIO control not enabled
@@ -600,7 +600,7 @@ counter must be set at 1280. */
     00 [0] PA_00_TP54 not controlled by peripheral
 */
 
-#define PIOB_PDR_INIT (u32)0x00400058
+#define PIOB_PDR_INIT (u32)0x00400008
 /*
     31 [0] PB_31_ 
     30 [0] PB_30_ 
@@ -1413,7 +1413,7 @@ Initial output values are stored here.
     00 [0] PA_00_TP54 pull-up enabled
 */
 
-#define PIOB_PPUDR_INIT (u32)0x01FFFE5F
+#define PIOB_PPUDR_INIT (u32)0x01FFFE0F
 /*
     31 [0] PB_31_
     30 [0] PB_30_
@@ -1503,7 +1503,7 @@ Initial output values are stored here.
     00 [1] PA_00_TP54 pull-up enabled
 */
 
-#define PIOB_PPUER_INIT (u32)0x000001C0
+#define PIOB_PPUER_INIT (u32)0x000001F0
 /*
     31 [0] PB_31_
     30 [0] PB_30_
