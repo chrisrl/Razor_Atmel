@@ -66,7 +66,6 @@ static u8 num[] = "0123456789";
 static int trans = 0;
 static u8 *numdetect1 = num;
 static u8 *numdetect2 = num;
-static int counter = 0;
 static int ten = 0;
 /**********************************************************************************************************************
 Function Definitions
@@ -167,13 +166,12 @@ static void UserApp1SM_Idle(void)
 
 
   if( IsButtonPressed(BLADE_AN1) || IsButtonPressed(BUTTON0) ) {
-    /* The PIR is detecting something */
+    /* The PIR is detecting something , go to transition state*/
     trans = 1;
     UserApp1_StateMachine = UserApp1SM_Transition;
     
   }
   else {
-    /* The PIR is not detecting anything */
    
     
     
@@ -186,18 +184,23 @@ static void UserApp1SM_Idle(void)
 static void UserApp1SM_Transition(void)
 {
   if (trans == 1) {
+    /* If transitioning to detection, do th following */
+    
+    /* set LEDs */
     LedOff(LCD_GREEN);
     LedOn(LCD_RED);
     LedOff(GREEN);
-    LedBlink(RED, LED_2HZ);
+    LedBlink(RED, LED_4HZ);
     
+    /* set LCD */
     LCDCommand(LCD_CLEAR_CMD);
     LCDMessage(LINE1_START_ADDR, detect);
     
+    /* turn on buzzers */
     PWMAudioOn(BUZZER2);
     PWMAudioOn(BUZZER1);
     
-    counter++;
+    /* updates counter. checks if counting with a tens place or not */
     if(ten == 1) {
       numdetect2++;
     }
@@ -210,25 +213,29 @@ static void UserApp1SM_Transition(void)
   }    
   
   if (trans == 0) {
+    /* if transitioning to an idle state, do the following */
+    
+    /* set LEDs */
     LedOff(LCD_RED);
     LedOn(LCD_GREEN);
     LedOff(RED);
     LedBlink(GREEN, LED_1HZ);
     
+    /* checks if counter is past the num array, sets ten mode and resets counters */
     if(*numdetect1 == '\0') {
       numdetect1 -= 9;
       ten = 1;
     }
-    
     if(*numdetect2 == '\0') {
       numdetect2 -= 10;
     }
-    
+    /* sets LCDs */
     LCDCommand(LCD_CLEAR_CMD);
     LCDMessage(LINE1_START_ADDR, clear);
     LCDMessage(LINE2_START_ADDR, numofdetect);
     LCDMessage(LINE2_START_ADDR + 17, numdetect1);
     
+    /* if not in ten mode, clear last two chars, otherwise clear only last char */
     if(ten == 0) {
       LCDClearChars(LINE2_START_ADDR + 18, 2);
     }
@@ -238,7 +245,7 @@ static void UserApp1SM_Transition(void)
     }
 
     
-    
+    /* turn off buzzers */
     PWMAudioOff(BUZZER1);
     PWMAudioOff(BUZZER2);
     
@@ -253,7 +260,7 @@ static void UserApp1SM_Transition(void)
 static void UserApp1SM_Detected(void)
 {
   if( IsButtonPressed(BLADE_AN1) || IsButtonPressed(BUTTON0) ) {
-    
+    /* adjusts frequency within a range */
     static int  freq = 912;
     static int increment = -1;
     
