@@ -59,7 +59,8 @@ Variable names shall start with "UserApp1_" and be declared as static.
 ***********************************************************************************************************************/
 static fnCode_type UserApp1_StateMachine;            /* The state machine function pointer */
 //static u32 UserApp1_u32Timeout;                      /* Timeout counter used across states */
-
+static u8 clear[] = "ALL CLEAR";
+static u8 detect[] = "OBJECT DETECTED";
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -96,7 +97,10 @@ void UserApp1Initialize(void)
   LedOff(RED);
   LedOff(LCD_BLUE);
   LedOff(LCD_RED);
- 
+  
+  LCDCommand(LCD_CLEAR_CMD);
+  LCDMessage(LINE1_START_ADDR, clear);
+
 
   
  
@@ -150,33 +154,35 @@ static void UserApp1SM_Idle(void)
 {
   static int  freq = 912;
   static int increment = -1;
-  static int timer = 0;
+  static LedRateType eCurrentRate = LED_PWM_5;
   
-  u8 allclear[] = "ALL CLEAR";
-  u8 objectdetected[] = "OBJECT DETECTED";
+ 
   
   
   PWMAudioSetFrequency(BUZZER1, freq);
-  
   PWMAudioSetFrequency(BUZZER2, freq);
 
     if( IsButtonPressed(BLADE_AN1) || IsButtonPressed(BUTTON0) )
   {
     /* The PIR is detecting something */
-    LedOn(RED);
     LedOff(LCD_GREEN);
     LedOn(LCD_RED);
+    LedOff(GREEN);
+    LedBlink(RED, LED_2HZ);
+
     
+    LCDMessage(LINE1_START_ADDR, detect);
+    
+    /*
     PWMAudioOn(BUZZER2);
     PWMAudioOn(BUZZER1);
+    */
     
     if (freq >= 912)
       increment = -1;
     if (freq <= 635)
       increment = 1;
       
-    LCDCommand(LCD_CLEAR_CMD);
-    LCDMessage(LINE1_START_ADDR, objectdetected);
     
     freq = freq + increment;
      
@@ -184,16 +190,25 @@ static void UserApp1SM_Idle(void)
     else
   {
     /* The PIR is not detecting anything */
+    LedOff(LCD_RED);
     LedOn(LCD_GREEN);
     LedOff(RED);
+    LedPWM(GREEN, eCurrentRate);
+    
+    //LedPWM(BLUE, LED_PWM_5);
     
     PWMAudioOff(BUZZER1);
     PWMAudioOff(BUZZER2);
     
     LCDCommand(LCD_CLEAR_CMD);
-    LCDMessage(LINE1_START_ADDR, allclear);
+    LCDMessage(LINE2_START_ADDR, clear); 
+
+
+    
 
   }
+  
+      
 } /* end UserApp1SM_Idle() */
     
 
