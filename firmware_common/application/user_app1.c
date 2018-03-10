@@ -163,18 +163,46 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
+  static int timer = 0;
+  static int dots = 10;
 
 
   if( IsButtonPressed(BLADE_AN1) || IsButtonPressed(BUTTON0) ) {
     /* The PIR is detecting something , go to transition state*/
     trans = 1;
+    timer = 0;
+    dots = 10;
     UserApp1_StateMachine = UserApp1SM_Transition;
     
   }
   else {
    
+    timer++;
     
+    /* reset the counter */
+    if(WasButtonPressed(BUTTON1)) {
+      ButtonAcknowledge(BUTTON1);
+      
+      ten = 0;
+      numdetect1 = num;
+      numdetect2 = num;
+      
+      LCDClearChars(LINE2_START_ADDR + 18, 2);
+      LCDMessage(LINE2_START_ADDR + 17, "0");
+    }
     
+    if (dots == 13) {
+      LCDClearChars(LINE1_START_ADDR + 9, 4);
+      dots = 9;
+    }
+    
+    if(timer >= 500) {
+      LCDMessage(LINE1_START_ADDR + dots, ".");
+      dots++;
+      timer = 0;
+    }
+    
+   
  
   }
   
@@ -190,11 +218,11 @@ static void UserApp1SM_Transition(void)
     LedOff(LCD_GREEN);
     LedOn(LCD_RED);
     LedOff(GREEN);
-    LedBlink(RED, LED_4HZ);
+    LedBlink(RED, LED_2HZ);
     
     /* set LCD */
     LCDCommand(LCD_CLEAR_CMD);
-    LCDMessage(LINE1_START_ADDR, detect);
+    
     
     /* turn on buzzers */
     PWMAudioOn(BUZZER2);
@@ -219,6 +247,7 @@ static void UserApp1SM_Transition(void)
     LedOff(LCD_RED);
     LedOn(LCD_GREEN);
     LedOff(RED);
+    LedOff(BLUE);
     LedBlink(GREEN, LED_1HZ);
     
     /* checks if counter is past the num array, sets ten mode and resets counters */
@@ -243,7 +272,7 @@ static void UserApp1SM_Transition(void)
       LCDMessage(LINE2_START_ADDR + 18, numdetect2);
       LCDClearChars(LINE2_START_ADDR + 19, 1);
     }
-
+    
     
     /* turn off buzzers */
     PWMAudioOff(BUZZER1);
@@ -259,16 +288,17 @@ static void UserApp1SM_Transition(void)
 
 static void UserApp1SM_Detected(void)
 {
+  static int counter = 0;
+  static int blue = 0;
+
   if( IsButtonPressed(BLADE_AN1) || IsButtonPressed(BUTTON0) ) {
     /* adjusts frequency within a range */
     static int  freq = 912;
     static int increment = -1;
+
     
     PWMAudioSetFrequency(BUZZER1, freq);
     PWMAudioSetFrequency(BUZZER2, freq);
-   
-
-    
     
     if (freq >= 912)
        increment = -1;
@@ -276,9 +306,35 @@ static void UserApp1SM_Detected(void)
        increment = 1;
     
     freq = freq + increment;
+    
+    if(counter == 250 && blue == 0) {
+      LedBlink(BLUE, LED_2HZ);
+      blue = 1;
+    }
+    
+    if(counter == 0 || counter == 500 || counter == 1000) {
+      LCDMessage(LINE1_START_ADDR, detect);
+      LCDClearChars(LINE2_START_ADDR, 20);
+    }
+    
+    if(counter == 250 || counter == 750) {
+      LCDMessage(LINE2_START_ADDR, detect);
+      LCDClearChars(LINE1_START_ADDR, 20);
+    }
+    
+    if(counter == 1000) {
+      counter = -1;
+    }
+    
+    counter++;
+    
+   
+
   }
   else {
+    counter = 0;
     trans = 0;
+    blue = 0;
     UserApp1_StateMachine = UserApp1SM_Transition;
   }
    
