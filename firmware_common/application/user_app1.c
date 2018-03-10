@@ -59,8 +59,15 @@ Variable names shall start with "UserApp1_" and be declared as static.
 ***********************************************************************************************************************/
 static fnCode_type UserApp1_StateMachine;            /* The state machine function pointer */
 //static u32 UserApp1_u32Timeout;                      /* Timeout counter used across states */
-static u8 clear[] = "ALL CLEAR";
-static u8 detect[] = "OBJECT DETECTED";
+static u8 clear[] = "ALL CLEAR.";
+static u8 detect[] = "OBJECT DETECTED!";
+static u8 numofdetect[] = "# OF DETECTIONS:";
+static u8 num[] = "0123456789";
+static int trans = 0;
+static u8 *numdetect1 = num;
+static u8 *numdetect2 = num;
+static int counter = 0;
+static int ten = 0;
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -97,9 +104,14 @@ void UserApp1Initialize(void)
   LedOff(RED);
   LedOff(LCD_BLUE);
   LedOff(LCD_RED);
+  LedBlink(GREEN, LED_1HZ);
   
   LCDCommand(LCD_CLEAR_CMD);
   LCDMessage(LINE1_START_ADDR, clear);
+  LCDMessage(LINE2_START_ADDR, numofdetect);
+  LCDMessage(LINE2_START_ADDR + 17, "0");
+  
+  
 
 
   
@@ -152,66 +164,118 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-  static int  freq = 912;
-  static int increment = -1;
-  static LedRateType eCurrentRate = LED_PWM_5;
-  
- 
-  
-  
-  PWMAudioSetFrequency(BUZZER1, freq);
-  PWMAudioSetFrequency(BUZZER2, freq);
 
-    if( IsButtonPressed(BLADE_AN1) || IsButtonPressed(BUTTON0) )
-  {
+
+  if( IsButtonPressed(BLADE_AN1) || IsButtonPressed(BUTTON0) ) {
     /* The PIR is detecting something */
-    LedOff(LCD_GREEN);
-    LedOn(LCD_RED);
-    LedOff(GREEN);
-    LedBlink(RED, LED_2HZ);
-
+    trans = 1;
+    UserApp1_StateMachine = UserApp1SM_Transition;
     
-    LCDMessage(LINE1_START_ADDR, detect);
-    
-    /*
-    PWMAudioOn(BUZZER2);
-    PWMAudioOn(BUZZER1);
-    */
-    
-    if (freq >= 912)
-      increment = -1;
-    if (freq <= 635)
-      increment = 1;
-      
-    
-    freq = freq + increment;
-     
   }
-    else
-  {
+  else {
     /* The PIR is not detecting anything */
-    LedOff(LCD_RED);
-    LedOn(LCD_GREEN);
-    LedOff(RED);
-    LedPWM(GREEN, eCurrentRate);
+   
     
-    //LedPWM(BLUE, LED_PWM_5);
     
-    PWMAudioOff(BUZZER1);
-    PWMAudioOff(BUZZER2);
-    
-    LCDCommand(LCD_CLEAR_CMD);
-    LCDMessage(LINE2_START_ADDR, clear); 
-
-
-    
-
+ 
   }
   
       
 } /* end UserApp1SM_Idle() */
-    
 
+static void UserApp1SM_Transition(void)
+{
+  if (trans == 1) {
+    LedOff(LCD_GREEN);
+    LedOn(LCD_RED);
+    LedOff(GREEN);
+    LedBlink(RED, LED_2HZ);
+    
+    LCDCommand(LCD_CLEAR_CMD);
+    LCDMessage(LINE1_START_ADDR, detect);
+    
+    PWMAudioOn(BUZZER2);
+    PWMAudioOn(BUZZER1);
+    
+    counter++;
+    if(ten == 1) {
+      numdetect2++;
+    }
+    if (ten == 0 || *numdetect2 == '\0') {
+      numdetect1++;
+    }
+    
+    
+    UserApp1_StateMachine = UserApp1SM_Detected;
+  }    
+  
+  if (trans == 0) {
+    LedOff(LCD_RED);
+    LedOn(LCD_GREEN);
+    LedOff(RED);
+    LedBlink(GREEN, LED_1HZ);
+    
+    if(*numdetect1 == '\0') {
+      numdetect1 -= 9;
+      ten = 1;
+    }
+    
+    if(*numdetect2 == '\0') {
+      numdetect2 -= 10;
+    }
+    
+    LCDCommand(LCD_CLEAR_CMD);
+    LCDMessage(LINE1_START_ADDR, clear);
+    LCDMessage(LINE2_START_ADDR, numofdetect);
+    LCDMessage(LINE2_START_ADDR + 17, numdetect1);
+    
+    if(ten == 0) {
+      LCDClearChars(LINE2_START_ADDR + 18, 2);
+    }
+    else {
+      LCDMessage(LINE2_START_ADDR + 18, numdetect2);
+      LCDClearChars(LINE2_START_ADDR + 19, 1);
+    }
+
+    
+    
+    PWMAudioOff(BUZZER1);
+    PWMAudioOff(BUZZER2);
+    
+    UserApp1_StateMachine = UserApp1SM_Idle;
+    
+  }
+      
+    
+    
+}
+
+static void UserApp1SM_Detected(void)
+{
+  if( IsButtonPressed(BLADE_AN1) || IsButtonPressed(BUTTON0) ) {
+    
+    static int  freq = 912;
+    static int increment = -1;
+    
+    PWMAudioSetFrequency(BUZZER1, freq);
+    PWMAudioSetFrequency(BUZZER2, freq);
+   
+
+    
+    
+    if (freq >= 912)
+       increment = -1;
+    if (freq <= 635)
+       increment = 1;
+    
+    freq = freq + increment;
+  }
+  else {
+    trans = 0;
+    UserApp1_StateMachine = UserApp1SM_Transition;
+  }
+   
+}
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Handle an error */
 static void UserApp1SM_Error(void)          
