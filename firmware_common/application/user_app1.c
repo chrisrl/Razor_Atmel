@@ -59,9 +59,13 @@ Variable names shall start with "UserApp1_" and be declared as static.
 ***********************************************************************************************************************/
 static fnCode_type UserApp1_StateMachine;            /* The state machine function pointer */
 //static u32 UserApp1_u32Timeout;                      /* Timeout counter used across states */
+
+/* Messages */
 static u8 clear[] = "ALL CLEAR.";
-static u8 detect[] = "OBJECT DETECTED!";
+static u8 detect[] = "GOTCHA ! ! !";
 static u8 numofdetect[] = "# OF DETECTIONS:";
+
+/* detection counter */
 static u8 num[] = "0123456789";
 static int trans = 0;
 static u8 *numdetect1 = num;
@@ -93,6 +97,7 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+  /* initialize LEDs */
   LedOff(WHITE);
   LedOff(PURPLE);
   LedOff(BLUE);
@@ -105,6 +110,7 @@ void UserApp1Initialize(void)
   LedOff(LCD_RED);
   LedBlink(GREEN, LED_1HZ);
   
+  /* initial LCD messages */
   LCDCommand(LCD_CLEAR_CMD);
   LCDMessage(LINE1_START_ADDR, clear);
   LCDMessage(LINE2_START_ADDR, numofdetect);
@@ -164,7 +170,7 @@ State Machine Function Definitions
 static void UserApp1SM_Idle(void)
 {
   static int timer = 0;
-  static int dots = 10;
+  static int dots = 10; //counts the dots
 
 
   if( IsButtonPressed(BLADE_AN1) || IsButtonPressed(BUTTON0) ) {
@@ -176,7 +182,7 @@ static void UserApp1SM_Idle(void)
     
   }
   else {
-   
+   /* The PIR is not detecting anything, idle state */
     timer++;
     
     /* reset the counter */
@@ -225,6 +231,7 @@ static void UserApp1SM_Transition(void)
     
     
     /* turn on buzzers */
+    /*
     PWMAudioOn(BUZZER2);
     PWMAudioOn(BUZZER1);
     
