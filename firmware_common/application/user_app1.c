@@ -231,7 +231,7 @@ static void UserApp1SM_Transition(void)
     
     
     /* turn on buzzers */
-    /*
+    
     PWMAudioOn(BUZZER2);
     PWMAudioOn(BUZZER1);
     
