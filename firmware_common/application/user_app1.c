@@ -64,6 +64,7 @@ static fnCode_type UserApp1_StateMachine;            /* The state machine functi
 static u8 clear[] = "ALL CLEAR.";
 static u8 detect[] = "GOTCHA ! ! !";
 static u8 numofdetect[] = "# OF DETECTIONS:";
+static u8 standby[] = "PLEASE STAND BY.";
 
 /* detection counter */
 static u8 num[] = "0123456789";
@@ -181,6 +182,16 @@ static void UserApp1SM_Idle(void)
     UserApp1_StateMachine = UserApp1SM_Transition;
     
   }
+  
+  else if (WasButtonPressed(BUTTON2)) {
+    ButtonAcknowledge(BUTTON2);
+    
+    timer = 0;
+    trans = 2;
+    dots = 10;
+    UserApp1_StateMachine = UserApp1SM_Transition;
+  }
+  
   else {
    /* The PIR is not detecting anything, idle state */
     timer++;
@@ -224,6 +235,7 @@ static void UserApp1SM_Transition(void)
     LedOff(LCD_GREEN);
     LedOn(LCD_RED);
     LedOff(GREEN);
+    LedOff(YELLOW);
     LedBlink(RED, LED_2HZ);
     
     /* set LCD */
@@ -255,6 +267,7 @@ static void UserApp1SM_Transition(void)
     LedOn(LCD_GREEN);
     LedOff(RED);
     LedOff(BLUE);
+    LedOff(YELLOW);
     LedBlink(GREEN, LED_1HZ);
     
     /* checks if counter is past the num array, sets ten mode and resets counters */
@@ -287,6 +300,28 @@ static void UserApp1SM_Transition(void)
     
     UserApp1_StateMachine = UserApp1SM_Idle;
     
+  }
+  
+  if(trans == 2) {
+    /* if transitioning to the nothing state, do the following */
+    
+    /* set LEDs */
+    LedOn(LCD_GREEN);
+    LedOn(LCD_RED);
+    LedOff(RED);
+    LedOff(BLUE);
+    LedOff(GREEN);
+    LedOn(YELLOW);
+    
+    /* sets LCDs */
+    LCDCommand(LCD_CLEAR_CMD);
+    LCDMessage(LINE1_START_ADDR, standby);
+    
+    /* turn off buzzers */
+    PWMAudioOff(BUZZER1);
+    PWMAudioOff(BUZZER2);
+    
+    UserApp1_StateMachine = UserApp1SM_Standby;
   }
       
     
@@ -338,6 +373,16 @@ static void UserApp1SM_Detected(void)
    
 
   }
+  
+  else if (WasButtonPressed(BUTTON2)) {
+    ButtonAcknowledge(BUTTON2);
+    
+    counter = 0;
+    trans = 2;
+    blue = 0;
+    UserApp1_StateMachine = UserApp1SM_Transition;
+  }
+  
   else {
     counter = 0;
     trans = 0;
@@ -345,6 +390,17 @@ static void UserApp1SM_Detected(void)
     UserApp1_StateMachine = UserApp1SM_Transition;
   }
    
+}
+
+static void UserApp1SM_Standby(void)
+{
+  if (WasButtonPressed(BUTTON2)) {
+    ButtonAcknowledge(BUTTON2);
+    
+    trans = 0;
+    UserApp1_StateMachine = UserApp1SM_Transition;
+  }
+  
 }
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Handle an error */

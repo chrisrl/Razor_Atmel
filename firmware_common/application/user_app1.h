@@ -61,6 +61,8 @@ static void UserApp1SM_Error(void);
 static void UserApp1SM_Transition(void);
 
 static void UserApp1SM_Detected(void);
+
+static void UserApp1SM_Standby(void);
 #endif /* __USER_APP1_H */
 
 
