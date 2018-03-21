@@ -81,7 +81,7 @@ Variable names shall start with "Led_" and be declared as static.
 /* LED locations: order must correspond to the order set in LedNumberType in the header file. */
 static u32 Led_au32BitPositions[] = {PB_13_LED_WHT, PB_14_LED_PRP, PB_18_LED_BLU, PB_16_LED_CYN,
                                      PB_19_LED_GRN, PB_17_LED_YLW, PB_15_LED_ORG, PB_20_LED_RED,
-                                     PB_10_LCD_BL_RED, PB_11_LCD_BL_GRN, PB_12_LCD_BL_BLU};
+                                     PB_10_LCD_BL_RED, PB_11_LCD_BL_GRN, PB_12_LCD_BL_BLU, PB_03_BLADE_AN0};
 
 /* Control array for all LEDs in system initialized for LedInitialize().  Array values correspond to LedConfigType fields: 
      eMode         eRate      u16Count       eCurrentDuty     eActiveState     ePort      LedNumberType */
@@ -96,7 +96,8 @@ static LedConfigType Leds_asLedArray[TOTAL_LEDS] =
  {LED_PWM_MODE, LED_PWM_100, LED_PWM_100, LED_PWM_DUTY_HIGH, LED_ACTIVE_HIGH, LED_PORTB}, /* RED        */
  {LED_PWM_MODE, LED_PWM_100, LED_PWM_100, LED_PWM_DUTY_HIGH, LED_ACTIVE_HIGH, LED_PORTB}, /* LCD_RED    */
  {LED_PWM_MODE, LED_PWM_100, LED_PWM_100, LED_PWM_DUTY_HIGH, LED_ACTIVE_HIGH, LED_PORTB}, /* LCD_GREEN  */
- {LED_PWM_MODE, LED_PWM_100, LED_PWM_100, LED_PWM_DUTY_HIGH, LED_ACTIVE_HIGH, LED_PORTB}  /* LCD_BLUE   */
+ {LED_PWM_MODE, LED_PWM_100, LED_PWM_100, LED_PWM_DUTY_HIGH, LED_ACTIVE_HIGH, LED_PORTB},  /* LCD_BLUE   */
+ {LED_PWM_MODE, LED_PWM_100, LED_PWM_100, LED_PWM_DUTY_HIGH, LED_ACTIVE_HIGH, LED_PORTB}  /* BLADE_AN0  */
 };   
 #endif /* EIE1 */
 

@@ -509,7 +509,7 @@ counter must be set at 1280. */
     00 [1] PA_00_TP54 PIO control enabled
 */
 
-#define PIOB_PER_INIT (u32)0x01BFFFF7
+#define PIOB_PER_INIT (u32)0x01BFFFFF
 /*
     31 [0] PB_31_ PIO control not enabled
     30 [0] PB_30_ PIO control not enabled
@@ -600,7 +600,7 @@ counter must be set at 1280. */
     00 [0] PA_00_TP54 not controlled by peripheral
 */
 
-#define PIOB_PDR_INIT (u32)0x00400008
+#define PIOB_PDR_INIT (u32)0x00400000
 /*
     31 [0] PB_31_ 
     30 [0] PB_30_ 
@@ -691,7 +691,7 @@ Configures the pin as an output or input.
     00 [1] PA_00_TP54 output enabled
 */
 
-#define PIOB_OER_INIT (u32)0x01BFFFE0
+#define PIOB_OER_INIT (u32)0x01BFFFE8
 /*
     31 [0] PB_31_
     30 [0] PB_30_
@@ -781,7 +781,7 @@ Configures the pin as an output or input.
     00 [0] PA_00_TP54 output 
 */
 
-#define PIOB_ODR_INIT (u32)0x0040001F
+#define PIOB_ODR_INIT (u32)0x00400017
 /*
     31 [0] PB_31_
     30 [0] PB_30_
@@ -1052,7 +1052,7 @@ Default start-up IO values are held here.
     00 [0] PA_00_TP54 N/A
 */
 
-#define PIOB_SODR_INIT (u32)0x01BFFE00
+#define PIOB_SODR_INIT (u32)0x01BFFE08
 /*
     31 [0] PB_31_
     30 [0] PB_30_
@@ -1143,7 +1143,7 @@ Initial output values are stored here.
     00 [0] PA_00_TP54 N/A
 */
 
-#define PIOB_CODR_INIT (u32)0x00000000
+#define PIOB_CODR_INIT (u32)0x00000008
 /*
     31 [0] PB_31_
     30 [0] PB_30_

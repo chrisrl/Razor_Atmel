@@ -65,6 +65,11 @@ static u8 clear[] = "ALL CLEAR.";
 static u8 detect[] = "GOTCHA ! ! !";
 static u8 numofdetect[] = "# OF DETECTIONS:";
 static u8 standby[] = "PLEASE STAND BY.";
+static u8 mode[] = "CAMERA MODE:";
+static u8 burstm[] = "BURST";
+static u8 single[] = "SINGLE";
+
+static u8 *modep = burstm;
 
 /* detection counter */
 static u8 num[] = "0123456789";
@@ -72,6 +77,10 @@ static int trans = 0;
 static u8 *numdetect1 = num;
 static u8 *numdetect2 = num;
 static int ten = 0;
+
+/*mode constant*/
+static int burst = 1;
+
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -116,6 +125,8 @@ void UserApp1Initialize(void)
   LCDMessage(LINE1_START_ADDR, clear);
   LCDMessage(LINE2_START_ADDR, numofdetect);
   LCDMessage(LINE2_START_ADDR + 17, "0");
+  
+  LedOff(BLADE_AN0);
   
   
 
@@ -243,10 +254,10 @@ static void UserApp1SM_Transition(void)
     
     
     /* turn on buzzers */
-    
+   
     PWMAudioOn(BUZZER2);
     PWMAudioOn(BUZZER1);
-    
+  
     /* updates counter. checks if counting with a tens place or not */
     if(ten == 1) {
       numdetect2++;
@@ -255,6 +266,8 @@ static void UserApp1SM_Transition(void)
       numdetect1++;
     }
     
+    /*send constant signal to camera */
+    LedOn(BLADE_AN0);
     
     UserApp1_StateMachine = UserApp1SM_Detected;
   }    
@@ -298,6 +311,9 @@ static void UserApp1SM_Transition(void)
     PWMAudioOff(BUZZER1);
     PWMAudioOff(BUZZER2);
     
+    /* no signal to camera */
+    LedOff(BLADE_AN0);
+    
     UserApp1_StateMachine = UserApp1SM_Idle;
     
   }
@@ -316,10 +332,16 @@ static void UserApp1SM_Transition(void)
     /* sets LCDs */
     LCDCommand(LCD_CLEAR_CMD);
     LCDMessage(LINE1_START_ADDR, standby);
+    LCDMessage(LINE2_START_ADDR, mode);
+    LCDMessage(LINE2_START_ADDR + 13, modep);
     
     /* turn off buzzers */
     PWMAudioOff(BUZZER1);
     PWMAudioOff(BUZZER2);
+    
+    /* no signal to camera */
+    LedOff(BLADE_AN0);
+
     
     UserApp1_StateMachine = UserApp1SM_Standby;
   }
@@ -338,7 +360,6 @@ static void UserApp1SM_Detected(void)
     static int  freq = 912;
     static int increment = -1;
 
-    
     PWMAudioSetFrequency(BUZZER1, freq);
     PWMAudioSetFrequency(BUZZER2, freq);
     
@@ -366,6 +387,11 @@ static void UserApp1SM_Detected(void)
     
     if(counter == 1000) {
       counter = -1;
+    }
+    
+    /* switch off signal if not in burst mode */
+    if(counter == 50 && burst == -1) {
+      LedOff(BLADE_AN0);
     }
     
     counter++;
@@ -399,6 +425,26 @@ static void UserApp1SM_Standby(void)
     
     trans = 0;
     UserApp1_StateMachine = UserApp1SM_Transition;
+  }
+  
+  /* switch burst mode */
+  if (WasButtonPressed(BUTTON3)) {
+    ButtonAcknowledge(BUTTON3);
+    
+    burst *= -1;
+    
+    if (burst == 1) {
+      modep = burstm;
+      LCDClearChars(LINE2_START_ADDR + 13, 7); 
+      LCDMessage(LINE2_START_ADDR + 13, modep);
+    }
+    
+    if (burst == -1) {
+      modep = single;
+      LCDClearChars(LINE2_START_ADDR + 13, 7); 
+      LCDMessage(LINE2_START_ADDR + 13, modep);
+    }
+    
   }
   
 }
