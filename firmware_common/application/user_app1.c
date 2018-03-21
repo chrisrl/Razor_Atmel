@@ -119,6 +119,7 @@ void UserApp1Initialize(void)
   LedOff(LCD_BLUE);
   LedOff(LCD_RED);
   LedBlink(GREEN, LED_1HZ);
+  LedPWM(WHITE,LED_PWM_5);
   
   /* initial LCD messages */
   LCDCommand(LCD_CLEAR_CMD);
@@ -434,12 +435,16 @@ static void UserApp1SM_Standby(void)
     burst *= -1;
     
     if (burst == 1) {
+      LedOff(PURPLE);
+      LedPWM(WHITE,LED_PWM_10);
       modep = burstm;
       LCDClearChars(LINE2_START_ADDR + 13, 7); 
       LCDMessage(LINE2_START_ADDR + 13, modep);
     }
     
     if (burst == -1) {
+      LedOff(WHITE);
+      LedPWM(PURPLE,LED_PWM_10);
       modep = single;
       LCDClearChars(LINE2_START_ADDR + 13, 7); 
       LCDMessage(LINE2_START_ADDR + 13, modep);
