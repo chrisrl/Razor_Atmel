@@ -582,7 +582,31 @@ static void UserApp1SM_Standby(void)
       LCDClearChars(LINE2_START_ADDR + 13, 7); 
       LCDMessage(LINE2_START_ADDR + 13, modep);
     }
-  } 
+  }
+  
+  if ( IsButtonPressed(BUTTON0) ) {
+    ButtonAcknowledge(BUTTON0);
+    
+    if (modec == 0 || modec == 1) {
+      
+      trans = 1;
+      UserApp1_StateMachine = UserApp1SM_Transition;
+      
+    }
+    
+    if (modec == 2 || modec == 3) {
+      
+      trans = 3;
+      UserApp1_StateMachine = UserApp1SM_Transition;
+      
+    }
+    
+    if (modec == 4) {
+      
+      trans = 4;
+      UserApp1_StateMachine = UserApp1SM_Transition;
+    }
+  }
 }
 
 static void UserApp1SM_Timer(void)
@@ -610,16 +634,17 @@ static void UserApp1SM_Timer(void)
     
     if (clock == 3000 && modec == 2) {
       LedOn(BLADE_AN0);
+      sound_increment = 0;
     }
     
     if (clock == 10000 && modec == 3) {
       LedOn(BLADE_AN0);
+      sound_increment = 0;
     }
     
     if (clock == 3100 && modec == 2) {
       LedOff(BLADE_AN0);
       LedOn(CYAN);
-      sound_increment = 0;
       timesup = 1;
       LCDMessage(LINE2_START_ADDR + 7, "CHEESE!");
     }
@@ -627,7 +652,6 @@ static void UserApp1SM_Timer(void)
     if (clock == 10100 && modec == 3) {
       LedOff(BLADE_AN0);
       LedOn(CYAN);
-      sound_increment = 0;
       timesup = 1;
       LCDMessage(LINE2_START_ADDR + 7, "CHEESE!");
     }
