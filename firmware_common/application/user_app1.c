@@ -68,6 +68,9 @@ static u8 standby[] = "PLEASE STAND BY.";
 static u8 mode[] = "CAMERA MODE:";
 static u8 burstm[] = "BURST";
 static u8 single[] = "SINGLE";
+static u8 timer3[] = "TIMER3";
+static u8 timer10[]  = "TIMER10";
+static u8 booth[] = "BOOTH";
 
 static u8 *modep = burstm;
 
@@ -78,8 +81,9 @@ static u8 *numdetect1 = num;
 static u8 *numdetect2 = num;
 static int ten = 0;
 
+static u8 *timerp = num;
 /*mode constant*/
-static int burst = 1;
+static int modec = 0;
 
 /**********************************************************************************************************************
 Function Definitions
@@ -188,7 +192,18 @@ static void UserApp1SM_Idle(void)
 
   if( IsButtonPressed(BLADE_AN1) || IsButtonPressed(BUTTON0) ) {
     /* The PIR is detecting something , go to transition state*/
-    trans = 1;
+    
+    if (modec == 2 || modec == 3) {
+      trans = 3;
+    }
+    
+    else if (modec == 4) {
+      trans = 4;
+    }
+    else {
+      trans = 1;
+    }
+    
     timer = 0;
     dots = 10;
     UserApp1_StateMachine = UserApp1SM_Transition;
@@ -245,9 +260,12 @@ static void UserApp1SM_Transition(void)
     
     /* set LEDs */
     LedOff(LCD_GREEN);
+    LedOff(LCD_BLUE);
     LedOn(LCD_RED);
     LedOff(GREEN);
     LedOff(YELLOW);
+    LedOff(CYAN);
+    LedOff(ORANGE);
     LedBlink(RED, LED_2HZ);
     
     /* set LCD */
@@ -267,8 +285,11 @@ static void UserApp1SM_Transition(void)
       numdetect1++;
     }
     
-    /*send constant signal to camera */
+    
+    /*send constant signal to camera if in burst or single mode*/
     LedOn(BLADE_AN0);
+    
+    
     
     UserApp1_StateMachine = UserApp1SM_Detected;
   }    
@@ -278,10 +299,13 @@ static void UserApp1SM_Transition(void)
     
     /* set LEDs */
     LedOff(LCD_RED);
+    LedOff(LCD_BLUE);
     LedOn(LCD_GREEN);
     LedOff(RED);
     LedOff(BLUE);
     LedOff(YELLOW);
+    LedOff(CYAN);
+    LedOff(ORANGE);
     LedBlink(GREEN, LED_1HZ);
     
     /* checks if counter is past the num array, sets ten mode and resets counters */
@@ -323,6 +347,7 @@ static void UserApp1SM_Transition(void)
     /* if transitioning to the nothing state, do the following */
     
     /* set LEDs */
+    LedOff(LCD_BLUE);
     LedOn(LCD_GREEN);
     LedOn(LCD_RED);
     LedOff(RED);
@@ -346,9 +371,75 @@ static void UserApp1SM_Transition(void)
     
     UserApp1_StateMachine = UserApp1SM_Standby;
   }
-      
+  
+  if(trans == 3) {
+    /* if transitioning to the timer state, do the following */
+    
+    /*set LEDs*/
+    LedOff(LCD_RED);
+    LedOff(LCD_GREEN);
+    LedOn(LCD_BLUE);
+    LedOff(RED);
+    LedOff(BLUE);
+    LedOff(GREEN);
+    LedOff(YELLOW);
+    LedOff(WHITE);
+    LedOff(PURPLE);
+    LedOff(ORANGE);
+    LedBlink(CYAN, LED_1HZ);
+    
+    /* set LCD */
+    LCDCommand(LCD_CLEAR_CMD);
+    
+    /* buzzers on */
+    PWMAudioOn(BUZZER2);
+    PWMAudioOn(BUZZER1);
+    
+    /* updates counter. checks if counting with a tens place or not */
+    if(ten == 1) {
+      numdetect2++;
+    }
+    if (ten == 0 || *numdetect2 == '\0') {
+      numdetect1++;
+    }
+     
+    UserApp1_StateMachine = UserApp1SM_Timer;
+
+  }
+  
+  if(trans == 4) {
+    /* if transitioning to the timer state, do the following */
+    
+     /*set LEDs*/
+    LedOff(LCD_RED);
+    LedOn(LCD_GREEN);
+    LedOn(LCD_BLUE);
+    LedOff(RED);
+    LedOff(BLUE);
+    LedOff(GREEN);
+    LedOff(YELLOW);
+    LedOff(WHITE);
+    LedOff(PURPLE);
+    LedOff(CYAN);
+    LedBlink(ORANGE, LED_1HZ);
+    
+      /* set LCD */
+    LCDCommand(LCD_CLEAR_CMD);
+    LCDMessage(LINE1_START_ADDR, "~~~~~FOUR SHOTS~~~~~");
     
     
+    
+    /* updates counter. checks if counting with a tens place or not */
+    if(ten == 1) {
+      numdetect2++;
+    }
+    if (ten == 0 || *numdetect2 == '\0') {
+      numdetect1++;
+    }
+    
+    UserApp1_StateMachine = UserApp1SM_Booth;
+    
+  }
 }
 
 static void UserApp1SM_Detected(void)
@@ -390,14 +481,14 @@ static void UserApp1SM_Detected(void)
       counter = -1;
     }
     
-    /* switch off signal if not in burst mode */
-    if(counter == 50 && burst == -1) {
+    /* switch off signal if in single mode */
+    if(counter == 50 && modec == 1) {
       LedOff(BLADE_AN0);
+      LedOff(CYAN);
     }
     
-    counter++;
     
-   
+    counter++;
 
   }
   
@@ -421,36 +512,209 @@ static void UserApp1SM_Detected(void)
 
 static void UserApp1SM_Standby(void)
 {
+  static int count = 0;
+  
+  count += count;
+  
   if (WasButtonPressed(BUTTON2)) {
     ButtonAcknowledge(BUTTON2);
     
     trans = 0;
+    count = 0;
     UserApp1_StateMachine = UserApp1SM_Transition;
   }
   
-  /* switch burst mode */
+  /* switch shooting mode */
   if (WasButtonPressed(BUTTON3)) {
     ButtonAcknowledge(BUTTON3);
     
-    burst *= -1;
+    if (modec < 4) {
+      modec++;
+    }
+    else {
+      modec = 0;
+    }
     
-    if (burst == 1) {
+    
+    if (modec == 0) {
       LedOff(PURPLE);
-      LedPWM(WHITE,LED_PWM_10);
+      LedOff(ORANGE);
+      LedOff(CYAN);
+      LedPWM(WHITE,LED_PWM_5);
       modep = burstm;
       LCDClearChars(LINE2_START_ADDR + 13, 7); 
       LCDMessage(LINE2_START_ADDR + 13, modep);
     }
     
-    if (burst == -1) {
+    if (modec == 1) {
       LedOff(WHITE);
-      LedPWM(PURPLE,LED_PWM_10);
+      LedOff(ORANGE);
+      LedOff(CYAN);
+      LedPWM(PURPLE,LED_PWM_5);
       modep = single;
       LCDClearChars(LINE2_START_ADDR + 13, 7); 
       LCDMessage(LINE2_START_ADDR + 13, modep);
     }
     
+    if (modec == 2 || modec == 3) {
+      LedOff(PURPLE);
+      LedOff(WHITE);
+      LedOff(ORANGE);
+      LedPWM(CYAN,LED_PWM_5);
+      
+      if (modec == 2) {
+        modep = timer3;
+      }
+      else {
+        modep = timer10;
+      }
+      
+      LCDClearChars(LINE2_START_ADDR + 13, 7); 
+      LCDMessage(LINE2_START_ADDR + 13, modep);
+    }
+    
+    if (modec == 4) {
+      LedOff(WHITE);
+      LedOff(PURPLE);
+      LedOff(CYAN);
+      LedPWM(ORANGE,LED_PWM_5);
+      modep = booth;
+      LCDClearChars(LINE2_START_ADDR + 13, 7); 
+      LCDMessage(LINE2_START_ADDR + 13, modep);
+    }
+  } 
+}
+
+static void UserApp1SM_Timer(void)
+{
+  static int clock = 0;
+  static int sound = 262;
+  static int sound_increment = 30;
+  static int timesup = 0;
+  
+  if( IsButtonPressed(BLADE_AN1) || IsButtonPressed(BUTTON0) ) {
+    
+    
+    if( (clock % 1000) == 0 ) {
+     PWMAudioSetFrequency(BUZZER1, sound);
+     PWMAudioSetFrequency(BUZZER2, sound);
+     sound += sound_increment;
+     
+     if (timesup == 0) {
+       LCDMessage(LINE1_START_ADDR + 10, timerp);
+       LCDClearChars(LINE1_START_ADDR + 11, 9);
+       timerp++;
+     }
+     
+    }
+    
+    if (clock == 3000 && modec == 2) {
+      LedOn(BLADE_AN0);
+    }
+    
+    if (clock == 10000 && modec == 3) {
+      LedOn(BLADE_AN0);
+    }
+    
+    if (clock == 3100 && modec == 2) {
+      LedOff(BLADE_AN0);
+      LedOn(CYAN);
+      sound_increment = 0;
+      timesup = 1;
+      LCDMessage(LINE2_START_ADDR + 7, "CHEESE!");
+    }
+    
+    if (clock == 10100 && modec == 3) {
+      LedOff(BLADE_AN0);
+      LedOn(CYAN);
+      sound_increment = 0;
+      timesup = 1;
+      LCDMessage(LINE2_START_ADDR + 7, "CHEESE!");
+    }
+    
+    clock++;
   }
+  
+   else if (WasButtonPressed(BUTTON2)) {
+    ButtonAcknowledge(BUTTON2);
+   
+    trans = 2;
+    clock = 0;
+    sound_increment = 30;
+    sound = 262;
+    timerp = num;
+    timesup = 0;
+    UserApp1_StateMachine = UserApp1SM_Transition;
+  }
+  
+  else {
+    trans = 0;
+    clock = 0;
+    sound_increment = 30;
+    sound = 262;
+    timerp = num;
+    timesup = 0;
+    UserApp1_StateMachine = UserApp1SM_Transition;
+  }
+    
+
+}
+
+static void UserApp1SM_Booth(void)
+{
+  static int tick = 0;
+  static int song[] = {392, 466, 440, 294};
+  static int *songp = song;
+  
+  if( IsButtonPressed(BLADE_AN1) || IsButtonPressed(BUTTON0) ) {
+    
+    
+    if (tick == 1000 || tick == 4000 || tick == 7000 || tick == 10000) {
+      
+      LedOn(BLADE_AN0);
+      
+      timerp++;
+      LCDMessage(LINE2_START_ADDR + 10, timerp);
+      LCDClearChars(LINE2_START_ADDR + 11, 9);
+      
+      /* buzzers on */
+      PWMAudioOn(BUZZER2);
+      PWMAudioOn(BUZZER1);
+      
+      PWMAudioSetFrequency(BUZZER1, *songp);
+      PWMAudioSetFrequency(BUZZER2, *songp);
+     
+      songp++;
+      
+    }
+    
+    if (tick == 1100 || tick == 4100 || tick == 7100 || tick == 10100) {
+    
+      LedOff(BLADE_AN0);
+    }
+    
+    tick++;
+    
+    
+  }
+  else if (WasButtonPressed(BUTTON2)) {
+    ButtonAcknowledge(BUTTON2);
+   
+    trans = 2;
+    tick = 0;
+    timerp = num;
+    songp = song;
+    UserApp1_StateMachine = UserApp1SM_Transition;
+  }
+  
+  else {
+    trans = 0;
+    tick = 0;
+    timerp= num;
+    songp = song;
+    UserApp1_StateMachine = UserApp1SM_Transition;
+  }
+  
   
 }
 /*-------------------------------------------------------------------------------------------------------------------*/
